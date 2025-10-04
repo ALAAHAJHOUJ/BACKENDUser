@@ -7,7 +7,7 @@ app.use(cors());
 
 
 
-app.get("/:nom/:prenom",(req,res)=>{
+app.post("/:nom/:prenom",(req,res)=>{
 const nom1=req.params.nom;
 const prenom=req.params.prenom;
 const sql = `insert into Admine (nom,prenom,image,motdepasse,email) values ("${nom1}","${prenom}","image1","gdgdfdf","alaa.spread@gmail.com")`;
@@ -29,7 +29,7 @@ const sql = `insert into Admine (nom,prenom,image,motdepasse,email) values ("${n
 
 
 
-app.get("/supprimer",(req,res)=>{
+app.delete("/supprimer",(req,res)=>{
 console.log("debut de la demande ");
 const sql='delete from Admine';
 conn.query(sql,(err,results)=>{
@@ -48,10 +48,17 @@ conn.query(sql,(err,results)=>{
 
 
 
-app.get("/tester/:id",(req,res)=>{
-console.log(req.params);
-console.log('demande pour l\'endpoint tester');
-res.send("demande traitée");
+app.get("/getUsers",(req,res)=>{
+
+
+  conn.query('SELECT * FROM Admine', (err, result) => {
+    if (err) {console.log('erreur');return res.send('erreur')}
+    if(result) console.log(result);
+    res.send(result[0])
+  });
+
+
+
 })
 
 
