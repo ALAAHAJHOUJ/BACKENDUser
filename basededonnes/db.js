@@ -13,7 +13,7 @@ const connection = mysql.createConnection({
 connection.connect((err) => {
   if (err) {
     console.error('Erreur de connexion à la base de données :'+err.stack);
-    return;
+    process.exit(1);
   }
   console.log('Connecté à la base de données MySQL avec l’ID', connection.threadId);
 });

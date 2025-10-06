@@ -1,7 +1,9 @@
 const express=require("express");
 const app=express();
 const cors=require('cors')
-const conn=require("./basededonnes/db")
+const conn=require("./basededonnes/db");
+const crypter1 = require("./logique/hash");
+const comparer = require("./logique/comparer");
 
 app.use(cors());
 
@@ -37,25 +39,39 @@ const sql = `insert into Admine (nom,prenom,image,motdepasse,email) values ("${n
 
 app.post("/inscription/",(req,res)=>{
 console.log('inscription');
-console.log(req.body.email)
 
 const recherche=`select * from Admine where email="${req.body.email}"`;
+const motdepasse=req.body.password;
+console.log(motdepasse);
 
 
-conn.query(recherche,(err,results)=>{
-  if (err) {
-    console.error('Erreur lors de l’exécution de la requête :');
-    return res.status(500).send('Erreur serveur');
-  }
+
+        conn.query(recherche,(err,results)=>{
+          if (err) {
+            console.error('Erreur lors de l’exécution de la requête :');
+            return res.status(500).send('Erreur serveur');
+          }
 
 
-  if(results.length!==0)//vérifier si l'email existe dans la base de données
-  {
-  console.log("l'email existe déja!!!");
-  return res.send("l'email existe déja!!!")
-  }
 
-})
+
+          if(results.length!==0)//vérifier si l'email existe dans la base de données (s'il existe on envoie une reponse au client et l'utilisateur ne va pas s'enregistrer)
+          {
+          console.log("l'email existe déja!!!");
+          return res.send("l'email existe déja!!!")
+          }
+
+
+
+          else //on va commencer le processus de l'enregistrement de l'utilisateur 
+          {
+          //cryptage du mot de passe
+            const crypter=crypter1(motdepasse);
+            console.log("le mot de passe crypté:"+crypter);;
+            return res.send(comparer(motdepasse,crypter)+"");
+          }
+
+        })
 
 })
 
