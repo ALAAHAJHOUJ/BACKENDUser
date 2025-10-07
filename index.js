@@ -4,10 +4,48 @@ const cors=require('cors')
 const conn=require("./basededonnes/db");
 const crypter1 = require("./logique/hash");
 const comparer = require("./logique/comparer");
+const multer=require('multer');
+
+
+//pour personnaliser le nom de l'image telechargée
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './upload/')
+  },
+  filename: function (req, file, cb) {
+    cb(null,"hajhouj")
+  }
+})
+
+
+
+const upload=multer({storage});
+
+
+
+
+
+
+
+//endpoint pour telecharger l'image
+app.post("/upload",upload.single('image'),(req,res)=>{
+//console.log(req.body);
+console.log(req.body);
+console.log(req.file)
+res.send('uploaded succesfully');
+})
+
+
+
+
 
 app.use(cors());
 
 app.use(express.json());
+
+
+
+
 
 
 
@@ -67,13 +105,17 @@ console.log(motdepasse);
           {
           //cryptage du mot de passe
             const crypter=crypter1(motdepasse);
-            console.log("le mot de passe crypté:"+crypter);;
             return res.send(comparer(motdepasse,crypter)+"");
           }
 
         })
 
 })
+
+
+
+
+
 
 
 app.listen(8000,()=>{
