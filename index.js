@@ -7,66 +7,49 @@ const comparer = require("./logique/comparer");
 const multer=require('multer');
 
 
+
+app.use(cors());//autoriser les requetes
+
+app.use(express.json());//middelwere pour forma Json
+
+
 //pour personnaliser le nom de l'image telechargée
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    console.log('je suis executé'+req.Value)
     cb(null, './upload/')
   },
   filename: function (req, file, cb) {
-    cb(null,"hajhouj")
+    cb(null,req.Value+".jpeg");
   }
 })
 
 
 
-const upload=multer({storage});
+const upload=multer({storage});//middelwere pour formdata (fichiers)
+
+
+
+const middelwereError=(err,req,res,next)=>{//middelwere de gestion d'erreurs
+res.send('une erreur est servenu');
+}
 
 
 
 
+const routeMiddleware=(req, res, next)=> {//middelwere qui sera executé avant l'upload de l'image
+  const sql="select * from Admine";
+  let nombreLignes;
+  conn.query(sql,(err,resutat)=>{
+    if(err) {console.log('erreur lors de l\'execution de laquery sql');const error=new Error("une erreur est servenu pendant l'executionde laquery sql");next(error)}
+    const nombreLignes=+resutat.length+1;
 
+    const nomImage="image"+nombreLignes;
+    req.Value=nomImage;
+      next();
+  })
 
-
-//endpoint pour telecharger l'image
-app.post("/upload",upload.single('image'),(req,res)=>{
-//console.log(req.body);
-console.log(req.body);
-console.log(req.file)
-res.send('uploaded succesfully');
-})
-
-
-
-
-
-app.use(cors());
-
-app.use(express.json());
-
-
-
-
-
-
-
-app.post("/:nom/:prenom",(req,res)=>{
-const nom1=req.params.nom;
-const prenom=req.params.prenom;
-const sql = `insert into Admine (nom,prenom,image,motdepasse,email) values ("${nom1}","${prenom}","image1","gdgdfdf","alaa.spread@gmail.com")`;
-
-      conn.query(sql, (err, results) => {
-              if (err) {
-                console.error('Erreur lors de l’exécution de la requête :');
-                return res.status(500).send('Erreur serveur');
-              }
-
-
-              console.log("requet passsée avec succes!!!!");
-              res.send("request with succes");
-            });
-
-
-})
+}
 
 
 
@@ -75,12 +58,15 @@ const sql = `insert into Admine (nom,prenom,image,motdepasse,email) values ("${n
 
 
 
-app.post("/inscription/",(req,res)=>{
-console.log('inscription');
+
+
+
+
+app.post("/inscription/",routeMiddleware,upload.single('image'),(req,res)=>{
 
 const recherche=`select * from Admine where email="${req.body.email}"`;
 const motdepasse=req.body.password;
-console.log(motdepasse);
+
 
 
 
@@ -105,7 +91,16 @@ console.log(motdepasse);
           {
           //cryptage du mot de passe
             const crypter=crypter1(motdepasse);
-            return res.send(comparer(motdepasse,crypter)+"");
+            console.log("voila"+crypter);
+            //on va commencer l'enregistrement de l'utilisateur dans la base de données
+            const nombre=req.Value+1;
+            const nomImage=nombre+"";
+            const inerstion=`insert into Admine (nom,prenom,image,motdepasse,email) values ("${req.body.nom}","${req.body.prenom}","${nomImage}","${crypter}","${req.body.email}")`
+            conn.query(inerstion,(err,resultat)=>{
+              if(err) {console.log(err);return res.send("erreur")}
+              res.send("enregistrement avec succes")
+            })
+
           }
 
         })
@@ -114,7 +109,7 @@ console.log(motdepasse);
 
 
 
-
+app.use(middelwereError);//gerer les erreurs si un middelewere est arreté pour une certaine raison
 
 
 
