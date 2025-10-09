@@ -5,6 +5,8 @@ const conn=require("./basededonnes/db");
 const crypter1 = require("./logique/hash");
 const comparer = require("./logique/comparer");
 const multer=require('multer');
+const crypter2=require('bcrypt');
+const recherche=require('./logique/recherhce/recherchemotdepasse')
 
 
 
@@ -66,7 +68,7 @@ app.post("/inscription/",routeMiddleware,upload.single('image'),(req,res)=>{
 
 const recherche=`select * from Admine where email="${req.body.email}"`;
 const motdepasse=req.body.password;
-
+console.log(req.Value);
 
 
 
@@ -93,8 +95,7 @@ const motdepasse=req.body.password;
             const crypter=crypter1(motdepasse);
             console.log("voila"+crypter);
             //on va commencer l'enregistrement de l'utilisateur dans la base de données
-            const nombre=req.Value+1;
-            const nomImage=nombre+"";
+            const nomImage=req.Value;
             const inerstion=`insert into Admine (nom,prenom,image,motdepasse,email) values ("${req.body.nom}","${req.body.prenom}","${nomImage}","${crypter}","${req.body.email}")`
             conn.query(inerstion,(err,resultat)=>{
               if(err) {console.log(err);return res.send("erreur")}
@@ -106,6 +107,47 @@ const motdepasse=req.body.password;
         })
 
 })
+
+
+
+
+
+
+app.post("/Login", (req,res)=>{//endpointde l'autentification
+const {nom,password}=req.body;//recuperer les données utilisateur
+console.log(nom,password);
+
+
+
+
+const rechercher=`select * from Admine where nom="${nom}"  `;
+
+          conn.query(rechercher,(err,resultat)=>{
+            if(err) {console.log(err);return res.send("une erreur est servenue")}
+
+              recherche(resultat,password,res);//on va chercher maintenant dans la table pour savoir la ligne qui contient le mot de passe convenable
+            
+
+
+
+          })
+
+
+
+
+})
+
+
+
+
+
+app.post("Logout",(req,res)=>{   //endpoint de déconnexion
+console.log("déconnexion")
+})
+
+
+
+
 
 
 
