@@ -7,7 +7,12 @@ const comparer = require("./logique/comparer");
 const multer=require('multer');
 const crypter2=require('bcrypt');
 const recherche=require('./logique/recherhce/recherchemotdepasse')
+const cookieParser = require("cookie-parser")
+const jwt=require('jsonwebtoken');
 
+
+
+app.use(cookieParser());//middelewre de parse de cookies 
 
 
 app.use(cors());//autoriser les requetes
@@ -33,8 +38,10 @@ const upload=multer({storage});//middelwere pour formdata (fichiers)
 
 
 const middelwereError=(err,req,res,next)=>{//middelwere de gestion d'erreurs
+console.log(err)
 res.send('une erreur est servenu');
 }
+
 
 
 
@@ -57,7 +64,35 @@ const routeMiddleware=(req, res, next)=> {//middelwere qui sera executé avant l
 
 
 
+const verifierUser=(req,res,next)=>{ //fonction de verification de l'utiliateur s'il est authentifié ou non
 
+  const token1=req.cookies.token;
+  console.log(token1);
+  if(!token1)
+      {
+        return res.json({Error:'non authentifié'})
+      }
+      else 
+      {
+        jwt.verify(token1,"jwt-secret-key",(err,decoded)=>{
+          if(err) {console.log('probleme dans le token');console.log(err);return res.send("hhhhhh")}
+          req.name=decoded.name;
+          console.log(decoded)
+          next();
+        })
+      }
+
+
+
+}
+
+
+
+
+
+app.get('/',verifierUser,(req,res)=>{
+res.send("tester")
+})
 
 
 
@@ -120,17 +155,18 @@ console.log(nom,password);
 
 
 
-const rechercher=`select * from Admine where nom="${nom}"  `;
+const rechercher=`select * from Admine where nom="${nom}"  `;//recuperer tous les lignes de la table qui contient le nom saisie par l'utilisateur 
 
           conn.query(rechercher,(err,resultat)=>{
             if(err) {console.log(err);return res.send("une erreur est servenue")}
-
+              
+              if(resultat.length!=0)//s 'il y a pas de lignes qui continnent le nom pas la peine d'effectuer une recherche pour le mot de passe
               recherche(resultat,password,res);//on va chercher maintenant dans la table pour savoir la ligne qui contient le mot de passe convenable
             
 
 
 
-          })
+          });
 
 
 
@@ -141,9 +177,15 @@ const rechercher=`select * from Admine where nom="${nom}"  `;
 
 
 
-app.post("Logout",(req,res)=>{   //endpoint de déconnexion
-console.log("déconnexion")
-})
+app.get("/Logout",(req,res)=>{   //endpoint de déconnexion
+console.log("déconnexion");
+res.clearCookie('token');
+console.log("logout avec succes");
+res.send("logout avec succes")
+})    
+
+
+
 
 
 

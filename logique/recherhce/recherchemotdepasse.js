@@ -1,4 +1,7 @@
 const crypter=require('bcrypt')
+const jwt=require('jsonwebtoken');
+
+
 
 const rechercher=async(res,pass,resp)=>{
         for(let i=0;i<res.length;i++)
@@ -7,9 +10,11 @@ const rechercher=async(res,pass,resp)=>{
                     console.log(result);
 
 
-                    if(result) {//ici onva faire tout le travaille (authentification)
-                    console.log("utilisateur existe dans la base de données")
-                    return resp.send("utilisateur existe dans la base données")
+                    if(result) {//ici on va faire tout le travaille (authentification)
+                    console.log("utilisateur existe dans la base de données");
+                    const token=jwt.sign({nom:res[i].nom,prenom:res[i].prenom},"jwt-secret-key",{expiresIn:"1d"})
+                    resp.cookie('token',token);
+                    return resp.send("utilisateur existe dans la base données et voici le token");
 
                     }
 
