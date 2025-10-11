@@ -178,10 +178,21 @@ const rechercher=`select * from Admine where nom="${nom}"  `;//recuperer tous le
 
 
 
-app.get("/Logout",(req,res)=>{   //endpoint de déconnexion
-res.clearCookie('token');
-console.log("logout avec succes");
-res.send("logout avec succes");
+app.get("/Logout",(req,res)=>{    //endpoint de déconnexion
+   
+  
+  
+  try {//ici on va supprimer le token du client (déconnexion)
+    res.clearCookie('token');
+    console.log("logout avec succes");
+    res.send("logout avec succes");
+    } catch (error) {
+      console.log(error);
+      res.send("une erreur est servenue");
+    }
+
+
+
 })    
 
 
