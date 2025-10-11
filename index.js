@@ -76,8 +76,8 @@ const verifierUser=(req,res,next)=>{ //fonction de verification de l'utiliateur 
       {
         jwt.verify(token1,"jwt-secret-key",(err,decoded)=>{
           if(err) {console.log('probleme dans le token');console.log(err);return res.send("hhhhhh")}
-          req.name=decoded.name;
-          console.log(decoded)
+          req.name=decoded;
+          console.log(decoded);
           next();
         })
       }
@@ -91,7 +91,8 @@ const verifierUser=(req,res,next)=>{ //fonction de verification de l'utiliateur 
 
 
 app.get('/',verifierUser,(req,res)=>{
-res.send("tester")
+res.send(req.name);
+
 })
 
 
@@ -178,10 +179,9 @@ const rechercher=`select * from Admine where nom="${nom}"  `;//recuperer tous le
 
 
 app.get("/Logout",(req,res)=>{   //endpoint de déconnexion
-console.log("déconnexion");
 res.clearCookie('token');
 console.log("logout avec succes");
-res.send("logout avec succes")
+res.send("logout avec succes");
 })    
 
 
